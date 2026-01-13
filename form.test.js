@@ -1,52 +1,60 @@
-const React = require('react');
-const { render, screen, fireEvent, waitFor } = require('@testing-library/react');
-const { useForm } = require('react-hook-form');
-const Button = require('@mui/material/Button').default;
+const React = require("react");
+const { render, screen, fireEvent } = require("@testing-library/react");
+const { useForm, createFormControl, Controller } = require("react-hook-form");
 
-function SimpleForm({ onSubmit }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-    },
+const formControl = createFormControl({
+  defaultValues: {
+    firstName: "",
+  },
+});
+
+const setError = () => {
+  formControl.setError("firstName", "First name is required");
+};
+
+function SimpleForm() {
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    formControl,
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <label htmlFor="firstName">First Name</label>
-      <input id="firstName" {...register('firstName', { required: true })} />
-      {errors.firstName && <span>First name is required</span>}
+    <form
+      onSubmit={handleSubmit(() => {
+        setError();
+      })}
+    >
+      <Controller
+        name="firstName"
+        control={control}
+        render={({ field, fieldState: { error } }) => (
+          <>
+            <label htmlFor="firstName">First Name</label>
+            <input
+              {...field}
+              placeholder="First Name"
+              aria-label="First Name"
+            />
+            {error && <span>Field state error</span>}
+          </>
+        )}
+      />
+      {errors.firstName && <span>Form state error</span>}
 
-      <label htmlFor="lastName">Last Name</label>
-      <input id="lastName" {...register('lastName', { required: true })} />
-      {errors.lastName && <span>Last name is required</span>}
-
-      <Button loading={isSubmitting} type="submit">Submit</Button>
+      <button type="submit">Submit</button>
     </form>
   );
 }
 
-describe('React Hook Form', () => {
-  it('renders a simple form and handles submission', async () => {
-    const mockSubmit = jest.fn();
-    render(<SimpleForm onSubmit={mockSubmit} />);
-
-    const firstNameInput = screen.getByLabelText('First Name');
-    const lastNameInput = screen.getByLabelText('Last Name');
-    const submitButton = screen.getByRole('button', { name: 'Submit' });
-
-    expect(firstNameInput).toBeInTheDocument();
-    expect(lastNameInput).toBeInTheDocument();
-
-    fireEvent.change(firstNameInput, { target: { value: 'John' } });
-    fireEvent.change(lastNameInput, { target: { value: 'Doe' } });
+describe("React Hook Form", () => {
+  it("renders a simple form and handles submission", async () => {
+    render(<SimpleForm />);
+    const submitButton = screen.getByRole("button", { name: "Submit" });
     fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockSubmit).toHaveBeenCalledWith(
-        { firstName: 'John', lastName: 'Doe' },
-        expect.anything()
-      );
-    });
+    await screen.findByText("Form state error");
+    await screen.findByText("Field state error");
   });
 });
