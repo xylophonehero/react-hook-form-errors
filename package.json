@@ -7,9 +7,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.49.0"
+    "react-hook-form": "7.71.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",

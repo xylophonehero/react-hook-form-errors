@@ -1,9 +1,10 @@
 const React = require('react');
 const { render, screen, fireEvent, waitFor } = require('@testing-library/react');
 const { useForm } = require('react-hook-form');
+const Button = require('@mui/material/Button').default;
 
 function SimpleForm({ onSubmit }) {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -20,7 +21,7 @@ function SimpleForm({ onSubmit }) {
       <input id="lastName" {...register('lastName', { required: true })} />
       {errors.lastName && <span>Last name is required</span>}
 
-      <button type="submit">Submit</button>
+      <Button loading={isSubmitting} type="submit">Submit</Button>
     </form>
   );
 }
